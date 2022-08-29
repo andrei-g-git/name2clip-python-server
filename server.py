@@ -17,6 +17,7 @@ import json
 from bs4 import BeautifulSoup
 import html
 import re
+import spacy
 
 PORT = 9999
 HOST = "localhost"
@@ -46,11 +47,16 @@ class TestServer(BaseHTTPRequestHandler):
 
         src = body["src"]
 
+
         relativeSrc = src.split("/")[-1]
 
         print("RELATIVE SRC: ", relativeSrc)
 
-        regex = "%s$"%relativeSrc
+        # regex = "%s$"%relativeSrc
+        regex = "%s$"%relativeSrc[-15:] #if the string is too long it's possible there might be errors (i don't know if there might be errors)
+
+        print("REGEX:   ", regex)
+
         matchingElements = soup.find_all(attrs={"src": re.compile(r'%s'%regex)})
 
         contextElement = matchingElements[0]
@@ -72,6 +78,24 @@ class TestServer(BaseHTTPRequestHandler):
 
         #print("\n\n ^^^^^^^^^^^^^^^^^^^^^^ \n all inner text:   ", soup.text)
 
+        test_spacy(title, "awef", "waer", 1234)
+
+
+
+def test_spacy(title, innerHTML, src, hrefs):
+    nlp = spacy.load("en_core_web_md")
+
+    doc = nlp(title)
+
+    persons = [ent.text for ent in doc.ents if ent.label_ == "PERSON"] # or ent.label_ == "ORG"]
+    orgs = [ent.text for ent in doc.ents if ent.label_ == "ORG"]
+    print("PERSONS:  ", persons)
+    print("ORGS:   ", orgs)
+
+    print("bottom")
+
+
+
 
 
 server = HTTPServer((HOST, PORT), TestServer)
@@ -79,3 +103,14 @@ print("server running at ", HOST, " ", PORT)
 server.serve_forever()
 server.server_close()
 print("server stopped...")
+
+
+
+# def testSpacy(title, innerHTML, src, hrefs):
+#     nlp = spacy.load("en_core_web_sm")
+
+#     doc = nlp(title)
+
+#     for token in doc:
+#         if token.pos_ == "PROPN":
+#             print(token)
