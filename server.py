@@ -78,7 +78,11 @@ class TestServer(BaseHTTPRequestHandler):
 
         #print("\n\n ^^^^^^^^^^^^^^^^^^^^^^ \n all inner text:   ", soup.text)
 
-        test_spacy(title, "awef", "waer", 1234)
+        firstPerson = test_spacy(title, "awef", "waer", 1234)
+
+        print("FIRST:    ", firstPerson, "    type:   ", type(firstPerson))
+        print("BYTES:    ", bytes(firstPerson, encoding="utf-8"))
+        self.wfile.write(bytes(firstPerson, encoding="utf-8"))
 
 
 
@@ -93,6 +97,8 @@ def test_spacy(title, innerHTML, src, hrefs):
     print("ORGS:   ", orgs)
 
     print("bottom")
+
+    return persons[0]
 
 
 
