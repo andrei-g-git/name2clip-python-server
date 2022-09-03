@@ -53,15 +53,21 @@ class TestServer(BaseHTTPRequestHandler):
         print("RELATIVE SRC: ", relativeSrc)
 
         # regex = "%s$"%relativeSrc
-        regex = "%s$"%relativeSrc[-15:] #if the string is too long it's possible there might be errors (i don't know if there might be errors)
+        regex = "%s$"%relativeSrc[-15:] #if the string is too long it's possible there might be errors (i don't know if there might be errors)     ':' denotes a range I think
 
         print("REGEX:   ", regex)
+
+        print("IMG:   ", soup.find_all("img"))
 
         matchingElements = soup.find_all(attrs={"src": re.compile(r'%s'%regex)})
 
         contextElement = matchingElements[0]
 
         grandparent = contextElement.parent.parent
+
+        #test
+        par = contextElement.parent
+        print("PPPPPPPPPPPPPPPPPPPPP:   ", par)
 
         anchors = grandparent.find_all("a")
 
@@ -76,7 +82,9 @@ class TestServer(BaseHTTPRequestHandler):
         print("hrefs: ", hrefs)
         print("TITLE:  ", title)
 
-        #print("\n\n ^^^^^^^^^^^^^^^^^^^^^^ \n all inner text:   ", soup.text)
+        ############################
+        url = body["url"]
+
 
         firstPerson = test_spacy(title, "awef", "waer", 1234)
 
@@ -91,7 +99,7 @@ def test_spacy(title, innerHTML, src, hrefs):
 
     doc = nlp(title)
 
-    persons = [ent.text for ent in doc.ents if ent.label_ == "PERSON"] # or ent.label_ == "ORG"]
+    persons = [ent.text for ent in doc.ents if ent.label_ == "PERSON"] # or ent.label_ == "ORG"]      # list comprehension
     orgs = [ent.text for ent in doc.ents if ent.label_ == "ORG"]
     print("PERSONS:  ", persons)
     print("ORGS:   ", orgs)

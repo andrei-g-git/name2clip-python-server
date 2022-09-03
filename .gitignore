@@ -10,6 +10,9 @@
 
 # production
 /build
+/dist
+/__pycache__
+venv
 
 # misc
 .DS_Store
