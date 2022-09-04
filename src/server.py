@@ -6,6 +6,7 @@ import html
 import re
 import spacy
 from api_handlers import ApiHandler as API
+from nlp_processor import EntProcessor 
 
 class ScrapingServer(BaseHTTPRequestHandler):
     def do_POST(self):
@@ -21,8 +22,16 @@ class ScrapingServer(BaseHTTPRequestHandler):
 
         src = body["src"]
         url = body["url"]
+        print("==============================")
+        print("URL ->>> ", url)
 
-        soup = api.init_soup(url)
+        soup = api.init_soup(url)  
+
+        for data in soup(['style', 'script']):
+            # Remove tags
+            data.decompose()
+
+        #print(soup.prettify())  #<------------
 
         parent, grandparent = api.get_element_hierarchy_from_src(src, soup)
 
@@ -32,7 +41,53 @@ class ScrapingServer(BaseHTTPRequestHandler):
 
         title = soup.find("title").text            
 
+
+        proc = EntProcessor()
+        result = self.pick_best_name_candidate(
+            proc,
+            title,
+            src,
+            hrefs,
+            "awfaewfwaefawefe"
+        )
+
+        print("RRRRRRRESULT!!!!!!     ", result)
+
         self.wfile.write(bytes(body["src"], encoding="utf-8"))
+
+    def pick_best_name_candidate(self, entProcessor, title, src, hrefs, innerHtml):
+        proc = entProcessor
+
+        result = []
+
+        persons, orgs = proc.process_names_from_string(title)
+        if len(persons):
+            result = persons
+        elif len(orgs):
+            result = orgs
+        else:
+            persons, orgs = proc.process_names_from_string(src)
+            if len(persons):
+                result = persons
+            elif len(orgs):
+                result = orgs
+            else:
+                persons, orgs = proc.process_names_from_lists(hrefs)
+                if len(persons):
+                    result = persons
+                elif len(orgs):
+                    result = orgs
+                else:
+                    persons, orgs = proc.process_names_from_string(innerHtml)
+                    if len(persons):
+                        result = persons
+                    elif len(orgs):
+                        result = orgs     
+
+        return result
+
+
+
 
     @staticmethod
     def init_server(HOST, PORT):
