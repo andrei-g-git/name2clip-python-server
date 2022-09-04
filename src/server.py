@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 import html
 import re
 import spacy
+from api_handlers import ApiHandler as API
 
 class ScrapingServer(BaseHTTPRequestHandler):
     def do_POST(self):
@@ -14,7 +15,24 @@ class ScrapingServer(BaseHTTPRequestHandler):
         self.send_header("Content-type", "application/json")
         self.end_headers()
 
-        self.wfile.write(bytes("main server app reporting in...", encoding="utf-8"))
+        api = API()
+
+        body = api.load_request_body(self)
+
+        src = body["src"]
+        url = body["url"]
+
+        soup = api.init_soup(url)
+
+        parent, grandparent = api.get_element_hierarchy_from_src(src, soup)
+
+        hrefs = api.get_context_links(parent)
+        if not len(hrefs):
+            hrefs = api.get_context_links(grandparent)
+
+        title = soup.find("title").text            
+
+        self.wfile.write(bytes(body["src"], encoding="utf-8"))
 
     @staticmethod
     def init_server(HOST, PORT):
