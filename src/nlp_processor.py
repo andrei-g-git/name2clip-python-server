@@ -6,7 +6,7 @@ class EntProcessor:
         nlp = spacy.load("en_core_web_md")
         doc = nlp(string)
 
-        persons = [ent.text for ent in doc.ents if ent.label_ == "PERSON"] # or ent.label_ == "ORG"]      # list comprehension
+        persons = [ent.text for ent in doc.ents if ent.label_ == "PERSON"] 
         orgs = [ent.text for ent in doc.ents if ent.label_ == "ORG"]
         
         print("tokens:   ", [token for token in doc])
@@ -14,14 +14,11 @@ class EntProcessor:
         return persons, orgs
 
     def process_names_from_lists(self, hrefs):
-        persons = []
-        orgs = []
-        nlp = spacy.load("en_core_web_md")
-        if len(hrefs):
-            for link in hrefs:
-                doc = nlp(link)
-                persons = [ent.text for ent in doc.ents if ent.label_ == "PERSON"] 
-                orgs = [ent.text for ent in doc.ents if ent.label_ == "ORG"]
+        allLinks = [link for link in hrefs]
+        persons, orgs = []
+        if len(allLinks):
+            persons, orgs = self.process_names_from_string(allLinks)
+
         return persons, orgs
 
 

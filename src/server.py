@@ -1,37 +1,19 @@
 from http.server import HTTPServer, BaseHTTPRequestHandler
-import requests
-import json
-from bs4 import BeautifulSoup
-import html
-import re
-import spacy
 from api_handlers import ApiHandler as API
 from nlp_processor import EntProcessor 
 
 class ScrapingServer(BaseHTTPRequestHandler):
     def do_POST(self):
-        self.send_response(200)
-        self.path = "/scraper"
-        self.send_header('Access-Control-Allow-Origin', '*')
-        self.send_header("Content-type", "application/json")
-        self.end_headers()
+
+        self.handle_post_headers("/scraper")
 
         api = API()
 
         body = api.load_request_body(self)
-
         src = body["src"]
         url = body["url"]
         print("==============================")
-        print("URL ->>> ", url)
-
-        soup = api.init_soup(url)  
-
-        for data in soup(['style', 'script']):
-            # Remove tags
-            data.decompose()
-
-        #print(soup.prettify())  #<------------
+        soup = self.init_soup(api, url)
 
         parent, grandparent = api.get_element_hierarchy_from_src(src, soup)
 
@@ -41,53 +23,67 @@ class ScrapingServer(BaseHTTPRequestHandler):
 
         title = soup.find("title").text            
 
-
-        proc = EntProcessor()
-        result = self.pick_best_name_candidate(
-            proc,
+        resultList = self.pick_best_name_candidate(
+            EntProcessor(),
             title,
             src,
             hrefs,
             "awfaewfwaefawefe"
         )
+        print("RRRRRRRESULT!!!!!!     ", resultList[0])
 
-        print("RRRRRRRESULT!!!!!!     ", result)
+        #########
+        self.wfile.write(bytes(resultList[0], encoding="utf-8"))
 
-        self.wfile.write(bytes(body["src"], encoding="utf-8"))
+
 
     def pick_best_name_candidate(self, entProcessor, title, src, hrefs, innerHtml):
         proc = entProcessor
 
         result = []
-
         persons, orgs = proc.process_names_from_string(title)
+        print("11111")
         if len(persons):
             result = persons
         elif len(orgs):
             result = orgs
         else:
             persons, orgs = proc.process_names_from_string(src)
+            print("22222")
             if len(persons):
                 result = persons
             elif len(orgs):
                 result = orgs
             else:
                 persons, orgs = proc.process_names_from_lists(hrefs)
+                print("33333")
                 if len(persons):
                     result = persons
                 elif len(orgs):
                     result = orgs
                 else:
                     persons, orgs = proc.process_names_from_string(innerHtml)
+                    print("44444")
                     if len(persons):
                         result = persons
                     elif len(orgs):
                         result = orgs     
-
         return result
 
 
+    def init_soup(self, api, url):
+        soup = api.init_soup(url)
+        for data in soup(['style', 'script']):
+            data.decompose()
+        return soup
 
+
+    def handle_post_headers(self, path):
+        self.send_response(200)
+        self.path = "/scraper"
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header("Content-type", "application/json")
+        self.end_headers()
 
     @staticmethod
     def init_server(HOST, PORT):

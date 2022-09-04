@@ -23,14 +23,13 @@ class ApiHandler:
         soup = BeautifulSoup(content, "html.parser")
         return soup
 
-    def find_element_from_src(self, src, soup): #not sure why I pass 'self' here but apparently I have to
+    def find_element_from_src(self, src, soup): 
         relativeSrc = src.split("/")[-1]
-        regex = "%s$"%relativeSrc#[-15:] #if the string is too long it's possible there might be errors (i don't know if there might be errors)     ':' denotes a range I think
+        regex = "%s$"%relativeSrc
         print("REGEX:    ", regex)
         matchingElements = soup.find_all(attrs={"src": re.compile(r'%s'%regex)})
         contextElement = matchingElements[0]
 
-        #print(contextElement)
         return contextElement
 
     def get_element_hierarchy_from_src(self, src, soup):
@@ -39,7 +38,6 @@ class ApiHandler:
         parent = context.parent
         grandparent = parent.parent
 
-        #print("parent  :", parent, " \n grandparent:  ", grandparent)
         return parent, grandparent
 
     def get_context_links(self, element):
