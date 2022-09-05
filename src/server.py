@@ -15,13 +15,20 @@ class ScrapingServer(BaseHTTPRequestHandler):
         print("==============================")
         soup = self.init_soup(api, url)
 
+        #print(soup.prettify())
+
         parent, grandparent = api.get_element_hierarchy_from_src(src, soup)
 
-        hrefs = api.get_context_links(parent)
-        if not len(hrefs):
-            hrefs = api.get_context_links(grandparent)
+        hrefs = []
+
+        if parent != None or grandparent != None:
+            hrefs = api.get_context_links(parent)
+            if not len(hrefs):
+                hrefs = api.get_context_links(grandparent)
 
         title = soup.find("title").text            
+
+        #get the text from the surroundings too
 
         resultList = self.pick_best_name_candidate(
             EntProcessor(),

@@ -28,15 +28,18 @@ class ApiHandler:
         regex = "%s$"%relativeSrc
         print("REGEX:    ", regex)
         matchingElements = soup.find_all(attrs={"src": re.compile(r'%s'%regex)})
-        contextElement = matchingElements[0]
+        contextElement = None
+        if len(matchingElements):
+            contextElement = matchingElements[0]
 
         return contextElement
 
     def get_element_hierarchy_from_src(self, src, soup):
         context = self.find_element_from_src(src, soup)
-
-        parent = context.parent
-        grandparent = parent.parent
+        parent, grandparent = None, None
+        if context != None:
+            parent = context.parent
+            grandparent = parent.parent
 
         return parent, grandparent
 
