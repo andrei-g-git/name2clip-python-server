@@ -1,5 +1,5 @@
 import spacy
-
+import re
 class EntProcessor:
 
     def process_names_from_string(self, string):
@@ -14,7 +14,7 @@ class EntProcessor:
         #     print("LABELS: \n", ent.text, "    ", ent.label_)
 
 
-        properNouns = "".join([(token.text + " ") for token in doc if token.pos_ == "PROPN"])
+        properNouns = " ".join([(token.text) for token in doc if token.pos_ == "PROPN"])
         pnDoc = nlp(properNouns)
 
         for token in pnDoc:
@@ -26,14 +26,23 @@ class EntProcessor:
         print("tokens:   ", [token for token in doc])
         print("PN tokens:   ", [token for token in pnDoc])
         print("persons:   ", persons, "   orgs:    ", orgs)
-        return persons, orgs
+
+        if len(persons): return persons[0] 
+        elif len(orgs): return orgs[0]
+        else: return ""
+        
 
     def process_names_from_lists(self, hrefs):
-        allLinks = "".join(hrefs)#[link for link in hrefs]
-        persons, orgs = [], []
+        #get rid of separator chars and replace with spaces firts
+        allLinks = ""#.join(hrefs)#[link for link in hrefs]
+        for link in hrefs:
+            #for marker in ["-", "/", "\\", ".", ]:
+            extracted = re.sub('[^a-zA-Z0-9\n\.]', ' ', link)
+            allLinks += extracted
+        result = ""
         if len(allLinks):
-            persons, orgs = self.process_names_from_string(allLinks)
+            result = self.process_names_from_string(allLinks)
 
-        return persons, orgs
+        return result
 
 

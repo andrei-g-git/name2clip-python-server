@@ -13,11 +13,19 @@ class ScrapingServer(BaseHTTPRequestHandler):
         src = body["src"]
         url = body["url"]
         print("==============================")
-        soup = self.init_soup(api, url)
+        headers = {'User-Agent': 'Mozilla/5.0'}
+        soup = self.init_soup(api, url, headers)
 
-        #print(soup.prettify())
+        #test
+        f = open("F:\\zz delete\\demofile2.txt", "w", encoding="utf-8")
+        txt = '"""' + soup.prettify() + '"""'
+        f.write(txt)
+        f.close()
 
-        parent, grandparent = api.get_element_hierarchy_from_src(src, soup)
+        print("SOUPP ################################ \n", soup.prettify(), "\n ############################################")
+
+        context, parent, grandparent = api.get_element_hierarchy_from_src(src, soup)
+        alt = api.get_alt_from_media(context)
 
         hrefs = []
 
@@ -26,60 +34,49 @@ class ScrapingServer(BaseHTTPRequestHandler):
             if not len(hrefs):
                 hrefs = api.get_context_links(grandparent)
 
+        print("ACTUAL HREFS ------: ", hrefs)
+
         title = soup.find("title").text            
 
         #get the text from the surroundings too
 
-        resultList = self.pick_best_name_candidate(
+        result = self.pick_best_name_candidate(
             EntProcessor(),
             title,
             src,
+            alt,
             hrefs,
             "awfaewfwaefawefe"
         )
-        print("RRRRRRRESULT!!!!!!     ", resultList[0])
+        print("RRRRRRRESULT!!!!!!     ", result)
 
         #########
-        self.wfile.write(bytes(resultList[0], encoding="utf-8"))
+        self.wfile.write(bytes(result, encoding="utf-8"))
 
 
 
-    def pick_best_name_candidate(self, entProcessor, title, src, hrefs, innerHtml):
+    def pick_best_name_candidate(self, entProcessor, title, src, alt, hrefs, innerHtml):
         proc = entProcessor
 
-        result = []
-        persons, orgs = proc.process_names_from_string(title)
+        result = ""
+        result = proc.process_names_from_string(title)
         print("11111")
-        if len(persons):
-            result = persons
-        elif len(orgs):
-            result = orgs
-        else:
-            persons, orgs = proc.process_names_from_string(src)
+        if not len(result):
+            result = proc.process_names_from_string(alt)
             print("22222")
-            if len(persons):
-                result = persons
-            elif len(orgs):
-                result = orgs
-            else:
-                persons, orgs = proc.process_names_from_lists(hrefs)
-                print("33333")
-                if len(persons):
-                    result = persons
-                elif len(orgs):
-                    result = orgs
-                else:
-                    persons, orgs = proc.process_names_from_string(innerHtml)
-                    print("44444")
-                    if len(persons):
-                        result = persons
-                    elif len(orgs):
-                        result = orgs     
+            if not len(result):
+                links = hrefs.copy()
+                links.insert(0, src)
+                print("result HREF:   ", links, "FROMMMMMMMM:   ", hrefs)
+                result = proc.process_names_from_lists(links)
+                if not len(result):
+                    result = proc.process_names_from_string(innerHtml)
+                    print("44444")   
         return result
 
 
-    def init_soup(self, api, url):
-        soup = api.init_soup(url)
+    def init_soup(self, api, url, headers):
+        soup = api.init_soup(url, headers)
         for data in soup(['style', 'script']):
             data.decompose()
         return soup
