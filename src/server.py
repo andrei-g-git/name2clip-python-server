@@ -17,12 +17,12 @@ class ScrapingServer(BaseHTTPRequestHandler):
         soup = self.init_soup(api, url, headers)
 
         #test
-        f = open("F:\\zz delete\\demofile2.txt", "w", encoding="utf-8")
-        txt = '"""' + soup.prettify() + '"""'
-        f.write(txt)
-        f.close()
+        # f = open("F:\\zz delete\\demofile2.txt", "w", encoding="utf-8")
+        # txt = '"""' + soup.prettify() + '"""'
+        # f.write(txt)
+        # f.close()
 
-        print("SOUPP ################################ \n", soup.prettify(), "\n ############################################")
+        #print("SOUPP ################################ \n", soup.prettify(), "\n ############################################")
 
         context, parent, grandparent = api.get_element_hierarchy_from_src(src, soup)
         alt = api.get_alt_from_media(context)
@@ -44,9 +44,10 @@ class ScrapingServer(BaseHTTPRequestHandler):
             EntProcessor(),
             title,
             src,
+            url,
             alt,
             hrefs,
-            "awfaewfwaefawefe"
+            soup.text
         )
         print("RRRRRRRESULT!!!!!!     ", result)
 
@@ -55,7 +56,7 @@ class ScrapingServer(BaseHTTPRequestHandler):
 
 
 
-    def pick_best_name_candidate(self, entProcessor, title, src, alt, hrefs, innerHtml):
+    def pick_best_name_candidate(self, entProcessor, title, src, url, alt, hrefs, innerHtml):
         proc = entProcessor
 
         result = ""
@@ -67,6 +68,7 @@ class ScrapingServer(BaseHTTPRequestHandler):
             if not len(result):
                 links = hrefs.copy()
                 links.insert(0, src)
+                links.append(url)
                 print("result HREF:   ", links, "FROMMMMMMMM:   ", hrefs)
                 result = proc.process_names_from_lists(links)
                 if not len(result):
