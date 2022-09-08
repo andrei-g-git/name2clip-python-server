@@ -3,7 +3,8 @@ import re
 class EntProcessor:
 
     def process_names_from_string(self, string):
-        nlp = spacy.load("en_core_web_lg")
+        #nlp = spacy.load("en_core_web_lg")
+        nlp = spacy.load("G:\\portfolio\\projects\\scraper\\models\\test_person_ner_1")
 
         lowerString = string.lower()
 
