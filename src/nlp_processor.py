@@ -4,11 +4,11 @@ class EntProcessor:
 
     def process_names_from_string(self, string):
         #nlp = spacy.load("en_core_web_lg")
-        nlp = spacy.load("G:\\portfolio\\projects\\scraper\\models\\test_person_ner_1")
+        nlp = spacy.load("G:\\portfolio\\projects\\scraper\\models\\test_person_ner_2")
 
-        lowerString = string.lower()
+        #lowerString = string.lower()
 
-        doc = nlp(lowerString)
+        doc = nlp(string)
 
 
 
@@ -21,10 +21,12 @@ class EntProcessor:
         for ent in pnDoc.ents:
             print("LABELS: \n", ent.text, "    ", ent.label_)
 
-        persons = [ent.text for ent in pnDoc.ents if ent.label_ == "PERSON"]
-        orgs = [ent.text for ent in pnDoc.ents if ent.label_ == "ORG"]
+        # persons = [ent.text for ent in pnDoc.ents if ent.label_ == "PERSON"]
+        # orgs = [ent.text for ent in pnDoc.ents if ent.label_ == "ORG"]
+        persons = [ent.text for ent in doc.ents if ent.label_ == "PERSON"]
+        orgs = [ent.text for ent in doc.ents if ent.label_ == "ORG"]
         
-        #print("tokens:   ", [token for token in doc])
+        print("tokens:   ", [token for token in doc])
         print("PN tokens:   ", [token for token in pnDoc])
         print("persons:   ", persons, "   orgs:    ", orgs)
 
