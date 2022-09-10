@@ -4,7 +4,7 @@ class EntProcessor:
 
     def process_names_from_string(self, string):
         #nlp = spacy.load("en_core_web_lg")
-        nlp = spacy.load("G:\\portfolio\\projects\\scraper\\models\\test_person_ner_2")
+        nlp = spacy.load("G:\\portfolio\\projects\\scraper\\models\\woman_first_names_ner_model_1")
 
         #lowerString = string.lower()
 
