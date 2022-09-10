@@ -4,7 +4,7 @@ class EntProcessor:
 
     def process_names_from_string(self, string):
         #nlp = spacy.load("en_core_web_lg")
-        nlp = spacy.load("G:\\portfolio\\projects\\scraper\\models\\woman_first_names_ner_model_1")
+        nlp = spacy.load("G:\\portfolio\\projects\\scraper\\models\\woman_first_names_and_surnames_ner_model_1")
 
         #lowerString = string.lower()
 
@@ -40,7 +40,11 @@ class EntProcessor:
         allLinks = ""#.join(hrefs)#[link for link in hrefs]
         for link in hrefs:
             #for marker in ["-", "/", "\\", ".", ]:
-            extracted = re.sub('[^a-zA-Z0-9\n\.]', ' ', link)
+            extracted_old = re.sub('[^a-zA-Z0-9\n\.]', ' ', link)
+
+            #new don't know how to remove '-' with regex
+            extracted = extracted_old.replace("-", " ")
+
             allLinks += extracted
         result = ""
         if len(allLinks):
