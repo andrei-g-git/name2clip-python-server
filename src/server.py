@@ -10,7 +10,11 @@ class ScrapingServer(BaseHTTPRequestHandler):
         api = API()
 
         body = api.load_request_body(self)
+
+        # src = ""
+        # if "src" in body:
         src = body["src"]
+            
         url = body["url"]
         print("==============================")
         headers = {'User-Agent': 'Mozilla/5.0'}

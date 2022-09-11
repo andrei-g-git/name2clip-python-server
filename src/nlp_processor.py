@@ -1,16 +1,23 @@
 import spacy
 import re
+
+#test
+from spacy.matcher import Matcher
+
 class EntProcessor:
 
     def process_names_from_string(self, string):
         #nlp = spacy.load("en_core_web_lg")
-        nlp = spacy.load("G:\\portfolio\\projects\\scraper\\models\\woman_first_names_and_surnames_ner_model_1")
+        nlp = spacy.load("G:\\portfolio\\projects\\scraper\\models\\woman_first_names_ner_model_1")
 
         #lowerString = string.lower()
 
+        #test
+        string = string.replace("[M4A]", "")
+
         doc = nlp(string)
 
-
+        print("S T R I N G G G G :    ", string)
 
 
         properNouns = " ".join([(token.text) for token in doc if token.pos_ == "PROPN"])
@@ -26,6 +33,23 @@ class EntProcessor:
         persons = [ent.text for ent in doc.ents if ent.label_ == "PERSON"]
         orgs = [ent.text for ent in doc.ents if ent.label_ == "ORG"]
         
+        if '-' in persons: 
+            persons.remove('-')
+        if '-' in orgs: 
+            orgs.remove('-')
+
+        #test
+        pattern = [{"ENT_TYPE": "PERSON"}, {"ENT_TYPE": "PERSON"}] #good, if it's separated by comma it won't match
+        matcher = Matcher(nlp.vocab)
+        matcher.add("first-last-names", [pattern])
+        matches = matcher(doc)
+        for match_id, start, end in matches:
+            #string_id = nlp.vocab.strings[match_id]  # Get string representation
+            span = doc[start:end]  # The matched span
+            print("*************************** \n first and last name: ", span.text)
+
+
+
         print("tokens:   ", [token for token in doc])
         print("PN tokens:   ", [token for token in pnDoc])
         print("persons:   ", persons, "   orgs:    ", orgs)
