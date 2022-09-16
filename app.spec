@@ -5,7 +5,7 @@ block_cipher = None
 
 
 a = Analysis(
-    ['src\\app.py'],
+    ['C:/vscode-projects/name2clip-python-server/src/app.py'],
     pathex=[],
     binaries=[],
     datas=[],

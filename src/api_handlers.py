@@ -57,7 +57,7 @@ class ApiHandler:
         anchors = element.find_all("a")
         print("ANCHORS: ", anchors)
         for a in anchors:
-            print("LINK TEXT ********** : ", a.text)
+            print("LINK TEXT >>>>>>>> : ", a.text)
         hrefs = [a.get("href") for a in anchors]
         print("HREFS =====: ",hrefs)
         return hrefs

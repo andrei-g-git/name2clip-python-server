@@ -4,7 +4,7 @@ from nlp_processor import EntProcessor
 
 class ScrapingServer(BaseHTTPRequestHandler):
     def do_POST(self):
-
+        print("received post request")
         self.handle_post_headers("/scraper")
 
         api = API()
@@ -56,7 +56,10 @@ class ScrapingServer(BaseHTTPRequestHandler):
         print("RRRRRRRESULT!!!!!!     ", result)
 
         #########
-        self.wfile.write(bytes(result, encoding="utf-8"))
+        if len(result):
+            self.wfile.write(bytes(result, encoding="utf-8"))
+        else: 
+            self.wfile.write(bytes("image", encoding="utf-8"))
 
 
 
@@ -75,9 +78,9 @@ class ScrapingServer(BaseHTTPRequestHandler):
                 links.append(url)
                 print("result HREF:   ", links, "FROMMMMMMMM:   ", hrefs)
                 result = proc.process_names_from_lists(links)
-                if not len(result):
-                    result = proc.process_names_from_string(innerHtml)
-                    print("44444")   
+                # if not len(result):
+                #     result = proc.process_names_from_string(innerHtml)
+                #     print("44444")   
         return result
 
 
