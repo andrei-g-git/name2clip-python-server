@@ -1,7 +1,8 @@
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from api_handlers import ApiHandler as API
 from nlp_processor import EntProcessor 
-
+import spacy
+import pickle
 class ScrapingServer(BaseHTTPRequestHandler):
     def do_POST(self):
         print("received post request")
@@ -40,12 +41,22 @@ class ScrapingServer(BaseHTTPRequestHandler):
 
         print("ACTUAL HREFS ------: ", hrefs)
 
-        title = soup.find("title").text            
+        title = ""
+        if soup.find("title") != None and len(soup.find("title")):
+            title = soup.find("title").text            
 
         #get the text from the surroundings too
 
+        #no idea how to pass a language model changed from the tk app other than  it being saved and loaded to and from disk:
+        language_model = None
+        with open("C:/My_Data/language_model_tkinter.pkl", "rb") as file:
+            language_model = pickle.load(file)
+
+        
+             
         result = self.pick_best_name_candidate(
             EntProcessor(),
+            language_model,
             title,
             src,
             url,
@@ -63,24 +74,24 @@ class ScrapingServer(BaseHTTPRequestHandler):
 
 
 
-    def pick_best_name_candidate(self, entProcessor, title, src, url, alt, hrefs, innerHtml):
+    def pick_best_name_candidate(self, entProcessor, model, title, src, url, alt, hrefs, innerHtml):
         proc = entProcessor
 
         result = ""
-        result = proc.process_names_from_string(title)
+        result = proc.process_names_from_string(title, model)
         print("11111")
         if not len(result):
-            result = proc.process_names_from_string(alt)
+            result = proc.process_names_from_string(alt, model)
             print("22222")
+            # if not len(result):
+            #     links = hrefs.copy()
+            #     links.insert(0, src)
+            #     links.append(url)
+            #     print("result HREF:   ", links, "FROMMMMMMMM:   ", hrefs)
+            #     result = proc.process_names_from_lists(links)
             if not len(result):
-                links = hrefs.copy()
-                links.insert(0, src)
-                links.append(url)
-                print("result HREF:   ", links, "FROMMMMMMMM:   ", hrefs)
-                result = proc.process_names_from_lists(links)
-                # if not len(result):
-                #     result = proc.process_names_from_string(innerHtml)
-                #     print("44444")   
+                result = proc.process_names_from_string(url, model)
+                print("44444")   
         return result
 
 
@@ -100,7 +111,7 @@ class ScrapingServer(BaseHTTPRequestHandler):
 
     @staticmethod
     def init_server(HOST, PORT):
-        server = HTTPServer((HOST, PORT), ScrapingServer) #so this passes it's class before it can full initialize? ...
+        server = HTTPServer((HOST, PORT), ScrapingServer) #so this passes it's class before it can fully initialize? ... 
         print("server running at ", HOST, " ", PORT)
         server.serve_forever()
         server.server_close()
