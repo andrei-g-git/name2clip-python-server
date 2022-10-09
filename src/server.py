@@ -1,7 +1,6 @@
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from api_handlers import ApiHandler as API
 from nlp_processor import EntProcessor 
-import spacy
 import pickle
 class ScrapingServer(BaseHTTPRequestHandler):
     def do_POST(self):
@@ -11,58 +10,31 @@ class ScrapingServer(BaseHTTPRequestHandler):
         api = API()
 
         body = api.load_request_body(self)
-
-        # src = ""
-        # if "src" in body:
-        src = body["src"]
             
         url = body["url"]
-        print("==============================")
+
         headers = {'User-Agent': 'Mozilla/5.0'}
         soup = self.init_soup(api, url, headers)
 
-        #test
-        # f = open("F:\\zz delete\\demofile2.txt", "w", encoding="utf-8")
-        # txt = '"""' + soup.prettify() + '"""'
-        # f.write(txt)
-        # f.close()
-
-        #print("SOUPP ################################ \n", soup.prettify(), "\n ############################################")
-
-        context, parent, grandparent = api.get_element_hierarchy_from_src(src, soup)
-        alt = api.get_alt_from_media(context)
-
-        hrefs = []
-
-        if parent != None or grandparent != None:
-            hrefs = api.get_context_links(parent)
-            if not len(hrefs):
-                hrefs = api.get_context_links(grandparent)
-
-        print("ACTUAL HREFS ------: ", hrefs)
-
         title = ""
         if soup.find("title") != None and len(soup.find("title")):
-            title = soup.find("title").text            
+            title = soup.find("title").text  
 
-        #get the text from the surroundings too
+        src = body["src"]
+        context, parent, grandparent = api.get_element_hierarchy_from_src(src, soup)
+        alt = api.get_alt_from_media(context)
 
         #no idea how to pass a language model changed from the tk app other than  it being saved and loaded to and from disk:
         language_model = None
         with open("C:/My_Data/language_model_tkinter.pkl", "rb") as file:
             language_model = pickle.load(file)
 
-        
-             
         result = self.pick_best_name_candidate(
             EntProcessor(),
             language_model,
             title,
-            src,
             url,
-            alt,
-            hrefs,
-            soup.text
+            alt
         )
         print("RRRRRRRESULT!!!!!!     ", result)
 
@@ -74,7 +46,7 @@ class ScrapingServer(BaseHTTPRequestHandler):
 
 
 
-    def pick_best_name_candidate(self, entProcessor, model, title, src, url, alt, hrefs, innerHtml):
+    def pick_best_name_candidate(self, entProcessor, model, title, url, alt):
         proc = entProcessor
 
         result = ""
@@ -83,12 +55,6 @@ class ScrapingServer(BaseHTTPRequestHandler):
         if not len(result):
             result = proc.process_names_from_string(alt, model)
             print("22222")
-            # if not len(result):
-            #     links = hrefs.copy()
-            #     links.insert(0, src)
-            #     links.append(url)
-            #     print("result HREF:   ", links, "FROMMMMMMMM:   ", hrefs)
-            #     result = proc.process_names_from_lists(links)
             if not len(result):
                 result = proc.process_names_from_string(url, model)
                 print("44444")   

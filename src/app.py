@@ -49,6 +49,7 @@ def handle_change():
             #guess it's writing to disk like a sap then...
             with open("C:/My_Data/language_model_tkinter.pkl", "wb") as file:
                 pickle.dump(language_model, file)
+            print(language_model.pipe_labels)
 
 button = Button(root, text="switch model" , command=handle_change)
 button.grid(column=2, row=0)
